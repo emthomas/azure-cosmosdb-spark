@@ -22,7 +22,18 @@
   */
 package com.microsoft.azure.cosmosdb.spark
 
-object Constants {
-  val currentVersion = "2.3.0_2.11-1.2.7"
-  val userAgentSuffix = s" SparkConnector/$currentVersion"
+import com.microsoft.azure.cosmosdb.spark.config.Config
+import com.microsoft.azure.documentdb.Document
+
+class ADLPartitionIterator(config: Config, adlFilePartition: ADLFilePartition) extends Iterator[Document] {
+
+  private lazy val reader: java.util.Iterator[Document] = {
+    val adlConnection = ADLConnection(config)
+    val items = adlConnection.readAdlFile(adlFilePartition.adlFilePath)
+    items.iterator()
+  }
+
+  override def hasNext: Boolean = reader.hasNext
+
+  override def next(): Document = reader.next()
 }

@@ -22,7 +22,7 @@
   */
 package com.microsoft.azure.cosmosdb.spark
 
-object Constants {
-  val currentVersion = "2.3.0_2.11-1.2.7"
-  val userAgentSuffix = s" SparkConnector/$currentVersion"
-}
+import org.apache.spark.Partition
+
+case class ADLFilePartition(index: Int,
+                            adlFilePath: String) extends Partition
