@@ -35,6 +35,8 @@ import org.json.{JSONArray, JSONObject}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.unsafe.types.UTF8String
 
+import org.apache.spark.sql.catalyst.expressions.UnsafeRow
+
 import scala.collection.JavaConverters._
 import scala.collection.immutable.HashMap
 
@@ -138,7 +140,7 @@ object CosmosDBRowConverter extends RowConverter[Document]
     jsonObject
   }
 
-  private def convertToJson(element: Any, elementType: DataType, isInternalRow: Boolean): Any = {
+  private def convertToJson(element: Any, elementType: Any, isInternalRow: Boolean): Any = {
     elementType match {
       case BinaryType           => element.asInstanceOf[Array[Byte]]
       case BooleanType          => element.asInstanceOf[Boolean]
@@ -154,7 +156,7 @@ object CosmosDBRowConverter extends RowConverter[Document]
         }
       }
       case TimestampType        => element.asInstanceOf[Timestamp].getTime
-      case arrayType: ArrayType => arrayTypeToJSONArray(arrayType.elementType, element.asInstanceOf[Seq[_]], isInternalRow)
+//      case arrayType: ArrayType => arrayTypeToJSONArray(arrayType.elementType, element.asInstanceOf[Seq[_]], isInternalRow)
       case mapType: MapType =>
         mapType.keyType match {
           case StringType => mapTypeToJSONObject(mapType.valueType, element.asInstanceOf[Map[String, _]], isInternalRow)
@@ -163,8 +165,8 @@ object CosmosDBRowConverter extends RowConverter[Document]
           )
         }
       case structType: StructType => rowToJSONObject(element.asInstanceOf[Row])
-      case _ =>
-        throw new Exception(s"Cannot cast $element into a Json value. $elementType has no matching Json value.")
+      case _ => element.asInstanceOf[org.apache.spark.sql.catalyst.expressions.UnsafeArrayData].toFloatArray
+//        throw new Exception(s"Cannot cast $element into a Json value. $elementType has no matching Json value.")
     }
   }
 
